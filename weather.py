@@ -4,6 +4,7 @@ import requests
 
 from model_city import WeatherCity
 from model_coordinates import WeatherCoordinates
+from model_air_pollution_coordinates import AirPollutionCoordinates
 
 
 LOG_ENABLED = True
@@ -37,7 +38,7 @@ def get_weather_city() -> WeatherCity:
 
 
 def get_weather_coordinates() -> WeatherCoordinates:
-    """Gets weather of a certain coordinates"""
+    """Gets weather at certain coordinates"""
     response = requests.get(
         urljoin(BASE_URL, 'weather'),
         params={
@@ -59,6 +60,29 @@ def get_weather_coordinates() -> WeatherCoordinates:
     return weather_coordinates
 
 
+def get_weather_air_pollution() -> AirPollutionCoordinates:
+    """Gets air pollution status of certain coordinates"""
+    response = requests.get(
+        urljoin(BASE_URL, 'air_pollution'),
+        params={
+            **KEY,
+            'lon': '55.6744',
+            'lat': '36.6697',
+        }
+    )
+    response.raise_for_status()
+
+    write_log([
+        response.status_code,
+        response.url,
+        response.text,
+    ])
+
+    air_pollution_coordinates = AirPollutionCoordinates.model_validate_json(json_data=response.content)
+    print("Air Pollution Coordinates validation complete")
+    return air_pollution_coordinates
+
+
 def write_log(data: list[str]) -> None:
     """Adding log to a file"""
     if not LOG_ENABLED:
@@ -74,6 +98,7 @@ def write_log(data: list[str]) -> None:
 def main():
     get_weather_city()
     get_weather_coordinates()
+    get_weather_air_pollution()
 
 
 main()
