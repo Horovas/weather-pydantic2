@@ -38,7 +38,7 @@ class MainWeatherData(BaseModel):
 
 
 class ForecastItem(BaseModel):
-    dt: int
+    dt: datetime
     main: MainWeatherData
     weather: List[WeatherInfo]
     clouds: Clouds
@@ -61,8 +61,8 @@ class City(BaseModel):
     country: str
     population: int
     timezone: int
-    sunrise: int
-    sunset: int
+    sunrise: datetime
+    sunset: datetime
 
 
 class WeatherCity(BaseModel):
