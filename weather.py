@@ -6,7 +6,8 @@ import requests
 from model_city import WeatherCity
 from model_coordinates import WeatherCoordinates
 from model_air_pollution_coordinates import AirPollutionCoordinates
-from model_geocoding import Geocoding
+from model_geocoding_direct import GeocodingDirect
+from model_geocoding_reverse import GeocodingReverse
 
 LOG_ENABLED = True
 LOG_FILENAME = 'weather_log.txt'
@@ -84,8 +85,8 @@ def get_weather_air_pollution() -> AirPollutionCoordinates:
     return air_pollution_coordinates
 
 
-def get_geocoding() -> Geocoding:
-    """Gets geocoding of a certain location"""
+def get_geocoding_direct() -> GeocodingDirect:
+    """Gets direct geocoding of a certain location"""
     response = requests.get(
         urljoin(BASE_URL, '/geo/1.0/direct'),
         params={
@@ -102,9 +103,33 @@ def get_geocoding() -> Geocoding:
         response.text,
     ])
 
-    some_geocoding = Geocoding.model_validate_json(json_data=response.content)
-    print("Geocoding validation complete")
-    return some_geocoding
+    some_geocoding_direct = GeocodingDirect.model_validate_json(json_data=response.content)
+    print("Geocoding direct validation complete")
+    return some_geocoding_direct
+
+
+def get_geocoding_reverse() -> GeocodingReverse:
+    """Gets reversed geocoding of a certain location"""
+    response = requests.get(
+        urljoin(BASE_URL, '/geo/1.0/reverse'),
+        params={
+            **KEY,
+            'lat': '55.7522',
+            'lon': '37.6156',
+            'units': 'metric',
+        }
+    )
+    response.raise_for_status()
+
+    write_log([
+        response.status_code,
+        response.url,
+        response.text,
+    ])
+
+    some_geocoding_reverse = GeocodingReverse.model_validate_json(json_data=response.content)
+    print("Geocoding reverse validation complete")
+    return some_geocoding_reverse
 
 
 def write_log(data: list[str]) -> None:
@@ -123,7 +148,8 @@ def main():
     get_weather_city()
     get_weather_coordinates()
     get_weather_air_pollution()
-    get_geocoding()
+    get_geocoding_direct()
+    get_geocoding_reverse()
 
 
 main()
